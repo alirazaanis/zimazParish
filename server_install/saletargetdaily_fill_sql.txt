@@ -1,0 +1,26 @@
+DECLARE @MinDate DATE = '20170101',
+        @MaxDate DATE = '20251231';
+
+WITH Dates
+AS (SELECT TOP (DATEDIFF(DAY, @MinDate, @MaxDate) + 1)
+        Date = DATEADD(DAY, ROW_NUMBER() OVER (ORDER BY a.object_id) - 1, @MinDate)
+    FROM sys.all_objects a
+        CROSS JOIN sys.all_objects b
+   ),
+     WarehouseList
+AS (SELECT WarehouseName
+    FROM WareHouse
+    WHERE WarehouseName In ( 'Parish', 'Zimaz' )
+   )
+INSERT INTO SaleTargetDaily
+(
+    WareHouseName,
+    Date,
+	QuantityTarget,
+	SaleTarget
+)
+SELECT WarehouseName,
+       Date,
+	   0, 0
+FROM Dates
+    CROSS JOIN WarehouseList

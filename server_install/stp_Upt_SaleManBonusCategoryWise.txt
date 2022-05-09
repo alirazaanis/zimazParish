@@ -1,0 +1,161 @@
+USE [Parish2017]
+GO
+/****** Object:  StoredProcedure [dbo].[stp_Upt_SaleManBonusCategoryWise]    Script Date: 10/04/2022 3:27:09 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[stp_Upt_SaleManBonusCategoryWise]
+AS
+BEGIN
+SET NOCOUNT ON;
+WITH AllRecords
+AS (SELECT EM.WareHouseId,
+           EM.WareHouseName,
+           EM.EmployeeName,
+           EM.AccountCode,
+           IC.ItemCategoryId,
+           IC1.ItemCategoryName AS ItemCategory,
+           IC2.ItemCategoryName AS SubCategory1,
+           IC3.ItemCategoryName AS SubCategory2,
+           IC4.ItemCategoryName AS SubCategory3,
+           IC5.ItemCategoryName AS SubCategory4,
+           CASE
+               WHEN IC1.ItemCategoryName = IC2.ItemCategoryName
+                    AND IC2.ItemCategoryName = IC3.ItemCategoryName
+                    AND IC3.ItemCategoryName = IC4.ItemCategoryName
+                    AND IC4.ItemCategoryName = IC5.ItemCategoryName THEN
+                   ''
+               ELSE
+                   CASE
+                       WHEN IC1.ItemCategoryName <> IC2.ItemCategoryName
+                            AND IC2.ItemCategoryName = IC3.ItemCategoryName
+                            AND IC3.ItemCategoryName = IC4.ItemCategoryName
+                            AND IC4.ItemCategoryName = IC5.ItemCategoryName THEN
+                           IC2.ItemCategoryName
+                       ELSE
+                           CASE
+                               WHEN IC1.ItemCategoryName <> IC2.ItemCategoryName
+                                    AND IC2.ItemCategoryName <> IC3.ItemCategoryName
+                                    AND IC3.ItemCategoryName = IC4.ItemCategoryName
+                                    AND IC4.ItemCategoryName = IC5.ItemCategoryName THEN
+                                   CONCAT(IC2.ItemCategoryName, ' - ', IC3.ItemCategoryName)
+                               ELSE
+                                   CASE
+                                       WHEN IC1.ItemCategoryName <> IC2.ItemCategoryName
+                                            AND IC2.ItemCategoryName <> IC3.ItemCategoryName
+                                            AND IC3.ItemCategoryName <> IC4.ItemCategoryName
+                                            AND IC4.ItemCategoryName = IC5.ItemCategoryName THEN
+                                           CONCAT(
+                                                     IC2.ItemCategoryName,
+                                                     ' - ',
+                                                     IC3.ItemCategoryName,
+                                                     ' - ',
+                                                     IC4.ItemCategoryName
+                                                 )
+                                       ELSE
+                                           CONCAT(
+                                                     IC2.ItemCategoryName,
+                                                     ' - ',
+                                                     IC3.ItemCategoryName,
+                                                     ' - ',
+                                                     IC4.ItemCategoryName,
+                                                     ' - ',
+                                                     IC5.ItemCategoryName
+                                                 )
+                                   END
+                           END
+                   END
+           END AS SubCategory,
+           CASE WHEN            CASE
+               WHEN IC1.ItemCategoryName = IC2.ItemCategoryName
+                    AND IC2.ItemCategoryName = IC3.ItemCategoryName
+                    AND IC3.ItemCategoryName = IC4.ItemCategoryName
+                    AND IC4.ItemCategoryName = IC5.ItemCategoryName THEN
+                   ''
+               ELSE
+                   CASE
+                       WHEN IC1.ItemCategoryName <> IC2.ItemCategoryName
+                            AND IC2.ItemCategoryName = IC3.ItemCategoryName
+                            AND IC3.ItemCategoryName = IC4.ItemCategoryName
+                            AND IC4.ItemCategoryName = IC5.ItemCategoryName THEN
+                           IC2.ItemCategoryName
+                       ELSE
+                           CASE
+                               WHEN IC1.ItemCategoryName <> IC2.ItemCategoryName
+                                    AND IC2.ItemCategoryName <> IC3.ItemCategoryName
+                                    AND IC3.ItemCategoryName = IC4.ItemCategoryName
+                                    AND IC4.ItemCategoryName = IC5.ItemCategoryName THEN
+                                   CONCAT(IC2.ItemCategoryName, ' - ', IC3.ItemCategoryName)
+                               ELSE
+                                   CASE
+                                       WHEN IC1.ItemCategoryName <> IC2.ItemCategoryName
+                                            AND IC2.ItemCategoryName <> IC3.ItemCategoryName
+                                            AND IC3.ItemCategoryName <> IC4.ItemCategoryName
+                                            AND IC4.ItemCategoryName = IC5.ItemCategoryName THEN
+                                           CONCAT(
+                                                     IC2.ItemCategoryName,
+                                                     ' - ',
+                                                     IC3.ItemCategoryName,
+                                                     ' - ',
+                                                     IC4.ItemCategoryName
+                                                 )
+                                       ELSE
+                                           CONCAT(
+                                                     IC2.ItemCategoryName,
+                                                     ' - ',
+                                                     IC3.ItemCategoryName,
+                                                     ' - ',
+                                                     IC4.ItemCategoryName,
+                                                     ' - ',
+                                                     IC5.ItemCategoryName
+                                                 )
+                                   END
+                           END
+                   END
+           END = '' THEN 1.0 ELSE 0 END AS Bonus
+    FROM ItemCategories AS IC
+        LEFT OUTER JOIN ItemCategories AS IC1
+            ON IC1.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 2)
+        LEFT OUTER JOIN ItemCategories AS IC2
+            ON IC2.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 4)
+        LEFT OUTER JOIN ItemCategories AS IC3
+            ON IC3.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 6)
+        LEFT OUTER JOIN ItemCategories AS IC4
+            ON IC4.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 8)
+        LEFT OUTER JOIN ItemCategories AS IC5
+            ON IC5.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 10),
+         (select t1.AccountCode, t1.AccountName As EmployeeName , t2.WareHouseId, t3.WareHouseName
+from accounts t1 left join accountbalances t2 on t1.accountcode = t2.accountcode LEFT JOIN WareHouse t3 On t2.WareHouseId = t3.WareHouseId
+where t1.Category = 'SM' and t2.WareHouseId in (3,4)) AS EM
+   )
+INSERT INTO [SaleManBonusCategoryWise]
+SELECT *
+FROM AllRecords
+WHERE Concat(
+                WareHouseId,
+                WareHouseName,
+                EmployeeName,
+                AccountCode,
+                ItemCategoryId,
+                SubCategory1,
+                SubCategory2,
+                SubCategory3,
+                SubCategory4,
+                SubCategory
+            ) NOT IN (
+                         SELECT Concat(
+                                          WareHouseId,
+                                          WareHouseName,
+                                          EmployeeName,
+                                          AccountCode,
+                                          ItemCategoryId,
+                                          SubCategory1,
+                                          SubCategory2,
+                                          SubCategory3,
+                                          SubCategory4,
+                                          SubCategory
+                                      )
+                         FROM [SaleManBonusCategoryWise]
+                     )
+END

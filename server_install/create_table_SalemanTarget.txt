@@ -1,0 +1,36 @@
+USE [Parish2017]
+GO
+
+/****** Object:  Table [dbo].[SalemanTarget]    Script Date: 5/9/2022 1:11:33 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[SalemanTarget](
+	[WareHouseName] [varchar](50) NOT NULL,
+	[EmployeeName] [varchar](200) NOT NULL,
+	[WOMEN] [bigint] NOT NULL,
+	[GENTS] [bigint] NOT NULL,
+	[KIDS] [bigint] NOT NULL,
+	[BAGS] [bigint] NOT NULL,
+	[ACCESSORIES] [bigint] NOT NULL,
+	[Goal] [bigint] NOT NULL,
+	[Amount] [money] NOT NULL,
+ CONSTRAINT [PK_SalemanTarget] PRIMARY KEY CLUSTERED 
+(
+	[WareHouseName] ASC,
+	[EmployeeName] ASC,
+	[WOMEN] ASC,
+	[GENTS] ASC,
+	[KIDS] ASC,
+	[BAGS] ASC,
+	[ACCESSORIES] ASC,
+	[Goal] ASC,
+	[Amount] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+

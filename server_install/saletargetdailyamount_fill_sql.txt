@@ -1,0 +1,26 @@
+DECLARE @MinDate DATE = '20170101',
+        @MaxDate DATE = '20251231';
+
+WITH Dates
+AS (SELECT TOP (DATEDIFF(DAY, @MinDate, @MaxDate) + 1)
+        Date = DATEADD(DAY, ROW_NUMBER() OVER (ORDER BY a.object_id) - 1, @MinDate)
+    FROM sys.all_objects a
+        CROSS JOIN sys.all_objects b
+   ),
+     EmployeeList
+AS (select t1.AccountCode, t1.AccountName As EmployeeName , t2.WareHouseId, t3.WareHouseName
+from accounts t1 left join accountbalances t2 on t1.accountcode = t2.accountcode LEFT JOIN WareHouse t3 On t2.WareHouseId = t3.WareHouseId
+where t1.Category = 'SM' and t2.WareHouseId in (3,4)
+   )
+INSERT INTO SaleTargetDailyAmount
+(
+    WareHouseName,
+    Date,
+	EmployeeName,
+	Amount
+)
+SELECT WarehouseName,
+       Date,
+	   EmployeeName, 0
+FROM Dates
+    CROSS JOIN EmployeeList

@@ -1,0 +1,87 @@
+USE [Parish2017]
+GO
+/****** Object:  StoredProcedure [dbo].[stp_RPT_PreviousTargetCrossTab]    Script Date: 08/04/2022 5:41:19 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[stp_RPT_PreviousTargetCrossTab]
+(
+    @P_WareHouseName varchar(50),
+    @P_StartDate varchar(20),
+    @P_EndDate varchar(20)
+)
+AS
+BEGIN
+    SET NOCOUNT ON
+
+    IF OBJECT_ID('tempdb..#PreviousTargetTempTable') IS NOT NULL
+        DROP TABLE #PreviousTargetTempTable1;
+		
+    WITH saledetailsitems
+    AS (SELECT format(CreatedOn, 'yyyy-MM-dd') AS FDATE,
+               format(CreatedOn, 'yyyy MM dd, MMMM dddd') AS DATE,
+               ItemId,
+               WareHouseId,
+               ItemSequenceId,
+               SUM(Quantity) AS Quantity,
+			   SUM(GrossAmount) AS GrossAmount,
+               SalesManCode AS AccountCode
+        FROM SalesDetail
+        GROUP BY format(CreatedOn, 'yyyy-MM-dd'),
+                 format(CreatedOn, 'yyyy MM dd, MMMM dddd'),
+                 WareHouseId,
+                 ItemSequenceId,
+                 SalesManCode,
+                 ItemId
+       ),
+         saledetailsitemscategory
+    AS (SELECT sdi.FDATE,
+               sdi.DATE,
+               sdi.ItemId,
+               sdi.ItemSequenceId,
+               sdi.Quantity,
+               sdi.WareHouseId,
+               sdi.AccountCode,
+               itm.ItemCategoryId,
+               IC1.ItemCategoryName AS ItemCategory,
+               IC2.ItemCategoryName AS SubCategory1,
+               IC3.ItemCategoryName AS SubCategory2,
+               IC4.ItemCategoryName AS SubCategory3,
+               IC5.ItemCategoryName AS SubCategory4,
+			   sdi.GrossAmount
+        FROM saledetailsitems AS sdi
+            INNER JOIN Item AS itm
+                ON itm.ItemID = sdi.ItemId
+            INNER JOIN ItemCategories AS IC
+                ON IC.ItemCategoryID = itm.ItemCategoryId
+            LEFT JOIN ItemCategories AS IC1
+                ON IC1.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 2)
+            LEFT JOIN ItemCategories AS IC2
+                ON IC2.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 4)
+            LEFT JOIN ItemCategories AS IC3
+                ON IC3.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 6)
+            LEFT JOIN ItemCategories AS IC4
+                ON IC4.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 8)
+            LEFT JOIN ItemCategories AS IC5
+                ON IC5.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 10)
+       )
+    SELECT FDATE, DATE, WareHouseName, ItemCategory, Sum(Quantity) AS Quantity, Sum(GrossAmount) As GrossAmount
+	INTO #PreviousTargetTempTable
+    FROM saledetailsitemscategory t1 LEFT JOIN WareHouse t2 ON t2.WareHouseId = t1.WareHouseId
+    WHERE FDATE Between @P_StartDate AND @P_EndDate
+          AND WareHouseName = @P_WareHouseName
+	GROUP BY FDATE, DATE, WareHouseName, ItemCategory
+	
+	SELECT DATE,
+		Sum(CASE WHEN ItemCategory = 'WOMEN' THEN Quantity ELSE 0 END) AS WOMEN, 
+		Sum(CASE WHEN ItemCategory = 'GENTS' THEN Quantity ELSE 0 END) AS GENTS, 
+		Sum(CASE WHEN ItemCategory = 'KIDS' THEN Quantity ELSE 0 END) AS KIDS, 
+		Sum(CASE WHEN ItemCategory = 'BAGS' THEN Quantity ELSE 0 END) AS BAGS, 
+		Sum(CASE WHEN ItemCategory = 'ACCESSORIES' THEN Quantity ELSE 0 END) AS ACCESSORIES, 
+		Sum(Quantity) AS Quantity, 
+		Format(Sum(GrossAmount),'#') As Sale, 
+		Format(Sum(GrossAmount)/Sum(Quantity),'#') As Average_Price 
+	FROM #PreviousTargetTempTable 
+	GROUP BY DATE
+END

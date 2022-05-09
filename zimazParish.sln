@@ -5,6 +5,24 @@ VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zimazParish", "zimazParish\zimazParish.csproj", "{01CF70D8-1DA9-43D3-9200-7D31046AC89B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5DA90C79-C6C8-400E-A7AA-A7E3A1891156}"
+	ProjectSection(SolutionItems) = preProject
+		server_install\bonus_calc.txt = server_install\bonus_calc.txt
+		server_install\create_table_SaleManBonusCategoryWise.txt = server_install\create_table_SaleManBonusCategoryWise.txt
+		server_install\create_table_SalemanTarget.txt = server_install\create_table_SalemanTarget.txt
+		server_install\create_table_SaleTargetDaily.txt = server_install\create_table_SaleTargetDaily.txt
+		server_install\create_table_SaleTargetDailyAmount.txt = server_install\create_table_SaleTargetDailyAmount.txt
+		server_install\employees.txt = server_install\employees.txt
+		server_install\salemantarget_fill_sql.txt = server_install\salemantarget_fill_sql.txt
+		server_install\saletargetdaily_fill_sql.txt = server_install\saletargetdaily_fill_sql.txt
+		server_install\saletargetdailyamount_fill_sql.txt = server_install\saletargetdailyamount_fill_sql.txt
+		server_install\stp_RPT_BonusPerPiece.txt = server_install\stp_RPT_BonusPerPiece.txt
+		server_install\stp_RPT_BonusPerPieceCrossTab.txt = server_install\stp_RPT_BonusPerPieceCrossTab.txt
+		server_install\stp_RPT_PreviousTargetCrossTab.txt = server_install\stp_RPT_PreviousTargetCrossTab.txt
+		server_install\stp_RPT_SalemanTarget.txt = server_install\stp_RPT_SalemanTarget.txt
+		server_install\stp_Upt_SaleManBonusCategoryWise.txt = server_install\stp_Upt_SaleManBonusCategoryWise.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

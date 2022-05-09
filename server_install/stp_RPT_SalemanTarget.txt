@@ -1,0 +1,96 @@
+USE [Parish2017]
+GO
+/****** Object:  StoredProcedure [dbo].[stp_RPT_SalemanTarget]    Script Date: 08/04/2022 5:41:19 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[stp_RPT_SalemanTarget]
+(
+    @P_WareHouseName varchar(50),
+    @P_StartDate varchar(20),
+    @P_EndDate varchar(20)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+WITH sdi
+    AS (SELECT format(CreatedOn, 'yyyy-MM-dd') AS DATE,
+               ItemId,
+               WareHouseId,
+               ItemSequenceId,
+               SUM(Quantity) AS Quantity,
+			   SUM(GrossAmount) AS GrossAmount,
+               SalesManCode AS AccountCode
+        FROM SalesDetail
+        GROUP BY format(CreatedOn, 'yyyy-MM-dd'),
+                 WareHouseId,
+                 ItemSequenceId,
+                 SalesManCode,
+                 ItemId
+       ),
+         sdic
+    AS (SELECT 
+               sdi.DATE,
+               sdi.ItemId,
+               sdi.ItemSequenceId,
+               sdi.Quantity,
+               sdi.WareHouseId,
+               sdi.AccountCode,
+               itm.ItemCategoryId,
+               IC1.ItemCategoryName AS ItemCategory,
+               IC2.ItemCategoryName AS SubCategory1,
+               IC3.ItemCategoryName AS SubCategory2,
+               IC4.ItemCategoryName AS SubCategory3,
+               IC5.ItemCategoryName AS SubCategory4,
+			   sdi.GrossAmount
+        FROM sdi
+            INNER JOIN Item AS itm
+                ON itm.ItemID = sdi.ItemId
+            INNER JOIN ItemCategories AS IC
+                ON IC.ItemCategoryID = itm.ItemCategoryId
+            LEFT JOIN ItemCategories AS IC1
+                ON IC1.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 2)
+            LEFT JOIN ItemCategories AS IC2
+                ON IC2.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 4)
+            LEFT JOIN ItemCategories AS IC3
+                ON IC3.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 6)
+            LEFT JOIN ItemCategories AS IC4
+                ON IC4.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 8)
+            LEFT JOIN ItemCategories AS IC5
+                ON IC5.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 10)
+       ),
+    smdp as(
+    SELECT DATE, WareHouseName, EmployeeName, ItemCategory, Sum(Quantity) As Quantity
+    FROM sdic t1 
+	LEFT JOIN (
+select t1.AccountCode, t1.AccountName As EmployeeName , t2.WareHouseId, t3.WareHouseName
+from accounts t1 left join accountbalances t2 on t1.accountcode = t2.accountcode LEFT JOIN WareHouse t3 On t2.WareHouseId = t3.WareHouseId
+where t1.Category = 'SM' and t2.WareHouseId in (3,4)	
+	) t2 ON t2.WareHouseId = t1.WareHouseId
+	AND t2.AccountCode = t1.AccountCode
+	WHERE EmployeeName IS NOT NULL
+	GROUP BY DATE, WareHouseName, EmployeeName, ItemCategory
+	),
+	smd as (SELECT DATE,
+		WareHouseName,
+		EmployeeName,
+		Sum(CASE WHEN ItemCategory = 'WOMEN' THEN Quantity ELSE 0 END) AS WOMEN, 
+		Sum(CASE WHEN ItemCategory = 'GENTS' THEN Quantity ELSE 0 END) AS GENTS, 
+		Sum(CASE WHEN ItemCategory = 'KIDS' THEN Quantity ELSE 0 END) AS KIDS, 
+		Sum(CASE WHEN ItemCategory = 'BAGS' THEN Quantity ELSE 0 END) AS BAGS, 
+		Sum(CASE WHEN ItemCategory = 'ACCESSORIES' THEN Quantity ELSE 0 END) AS ACCESSORIES
+	FROM smdp 
+	GROUP BY DATE, WareHouseName, EmployeeName)
+	SELECT DATE, smd.WareHouseName, smd.EmployeeName,
+	case when (smd.WOMEN * stgt.WOMEN) + (smd.GENTS * stgt.GENTS) + 
+	(smd.WOMEN * stgt.KIDS) + (smd.BAGS * stgt.BAGS) + 
+	(smd.ACCESSORIES * stgt.ACCESSORIES) >= Goal then Amount Else 0 End As Amount
+	FROM smd 
+	LEFT JOIN salemantarget stgt on stgt.WareHouseName = smd.WareHouseName AND
+	stgt.EmployeeName = smd.EmployeeName
+    WHERE DATE Between @P_StartDate AND @P_EndDate
+          AND smd.WareHouseName = @P_WareHouseName
+
+END

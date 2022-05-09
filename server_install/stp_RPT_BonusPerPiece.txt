@@ -1,0 +1,189 @@
+USE [Parish2017]
+GO
+/****** Object:  StoredProcedure [dbo].[stp_RPT_BonusPerPiece]    Script Date: 10/04/2022 2:30:16 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[stp_RPT_BonusPerPiece]
+(
+    @P_WareHouseName varchar(50),
+    @P_StartDate varchar(20),
+    @P_EndDate varchar(20)
+)
+AS
+BEGIN
+    SET NOCOUNT ON
+
+    IF OBJECT_ID('tempdb..#BonusPersonTempTable') IS NOT NULL
+        DROP TABLE #BonusPersonTempTable;
+
+    WITH saledetailsitems
+    AS (SELECT format(CreatedOn, 'yyyy-MM-dd') AS FDATE,
+               format(CreatedOn, 'yyyy MM dd, MMMM dddd') AS DATE,
+               ItemId,
+               WareHouseId,
+               ItemSequenceId,
+               SUM(Quantity) AS Quantity,
+               SalesManCode AS AccountCode
+        FROM SalesDetail
+        GROUP BY format(CreatedOn, 'yyyy-MM-dd'),
+                 format(CreatedOn, 'yyyy MM dd, MMMM dddd'),
+                 WareHouseId,
+                 ItemSequenceId,
+                 SalesManCode,
+                 ItemId
+       ),
+         saledetailsitemscategory
+    AS (SELECT sdi.FDATE,
+               sdi.DATE,
+               sdi.ItemId,
+               sdi.ItemSequenceId,
+               sdi.Quantity,
+               sdi.WareHouseId,
+               sdi.AccountCode,
+               itm.ItemCategoryId,
+               IC1.ItemCategoryName AS ItemCategory,
+               IC2.ItemCategoryName AS SubCategory1,
+               IC3.ItemCategoryName AS SubCategory2,
+               IC4.ItemCategoryName AS SubCategory3,
+               IC5.ItemCategoryName AS SubCategory4
+        FROM saledetailsitems AS sdi
+            INNER JOIN Item AS itm
+                ON itm.ItemID = sdi.ItemId
+            INNER JOIN ItemCategories AS IC
+                ON IC.ItemCategoryID = itm.ItemCategoryId
+            LEFT JOIN ItemCategories AS IC1
+                ON IC1.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 2)
+            LEFT JOIN ItemCategories AS IC2
+                ON IC2.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 4)
+            LEFT JOIN ItemCategories AS IC3
+                ON IC3.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 6)
+            LEFT JOIN ItemCategories AS IC4
+                ON IC4.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 8)
+            LEFT JOIN ItemCategories AS IC5
+                ON IC5.ItemCategoryCode = LEFT(IC.ItemCategoryCode, 10)
+       ),
+         bonusdetails
+    AS (SELECT sdic.FDATE,
+               sdic.DATE,
+               sdic.ItemId,
+               sdic.ItemSequenceId,
+               sdic.Quantity,
+               sdic.WareHouseId,
+               sbcw.WareHouseName,
+               sbcw.EmployeeName,
+               sdic.AccountCode,
+               sdic.ItemCategoryId,
+               sdic.ItemCategory,
+               sdic.SubCategory1,
+               sdic.SubCategory2,
+               sdic.SubCategory3,
+               sdic.SubCategory4,
+               sbcw.SubCategory,
+               sbcw.Bonus
+        FROM saledetailsitemscategory AS sdic
+            LEFT JOIN
+            (
+                SELECT WareHouseId,
+                       WareHouseName,
+                       EmployeeName,
+                       AccountCode,
+                       ItemCategoryID,
+                       ItemCategory,
+                       SubCategory1,
+                       SubCategory2,
+                       SubCategory3,
+                       SubCategory4,
+                       SubCategory,
+                       Bonus
+                FROM SaleManBonusCategoryWise
+                WHERE SubCategory != ''
+                      AND Bonus > 1
+                UNION
+                SELECT t1.WareHouseId,
+                       t1.WareHouseName,
+                       t1.EmployeeName,
+                       t1.AccountCode,
+                       t1.ItemCategoryID,
+                       t1.ItemCategory,
+                       t1.SubCategory1,
+                       t1.SubCategory2,
+                       t1.SubCategory3,
+                       t1.SubCategory4,
+                       t1.SubCategory,
+                       t2.Bonus
+                FROM
+                (
+                    SELECT WareHouseId,
+                           WareHouseName,
+                           EmployeeName,
+                           AccountCode,
+                           ItemCategoryID,
+                           ItemCategory,
+                           SubCategory1,
+                           SubCategory2,
+                           SubCategory3,
+                           SubCategory4,
+                           SubCategory
+                    FROM SaleManBonusCategoryWise
+                    WHERE SubCategory != ''
+                          AND Bonus < 1
+                ) t1
+                    LEFT JOIN
+                    (
+                        SELECT WareHouseId,
+                               WareHouseName,
+                               EmployeeName,
+                               AccountCode,
+                               ItemCategory,
+                               Bonus
+                        FROM SaleManBonusCategoryWise
+                        WHERE SubCategory = ''
+                    ) t2
+                        ON t2.WareHouseId = t1.WareHouseId
+                           AND t2.WareHouseName = t1.WareHouseName
+                           AND t2.EmployeeName = t1.EmployeeName
+                           AND t2.AccountCode = t1.AccountCode
+                           AND t2.ItemCategory = t1.ItemCategory
+                UNION
+                SELECT WareHouseId,
+                       WareHouseName,
+                       EmployeeName,
+                       AccountCode,
+                       ItemCategoryID,
+                       ItemCategory,
+                       SubCategory1,
+                       SubCategory2,
+                       SubCategory3,
+                       SubCategory4,
+                       SubCategory,
+                       Bonus
+                FROM SaleManBonusCategoryWise
+                WHERE SubCategory = ''
+            ) sbcw
+                ON sdic.SubCategory4 = sbcw.SubCategory4
+                   AND sdic.SubCategory3 = sbcw.SubCategory3
+                   AND sdic.SubCategory2 = sbcw.SubCategory2
+                   AND sdic.SubCategory1 = sbcw.SubCategory1
+                   AND sdic.ItemCategory = sbcw.ItemCategory
+                   AND sdic.ItemCategoryID = sbcw.ItemCategoryID
+                   AND sdic.AccountCode = sbcw.AccountCode
+                   AND sdic.WareHouseId = sbcw.WareHouseId
+       )
+    SELECT DATE,
+	       FDATE,
+           EmployeeName,
+           SUM(Quantity * Bonus) AS Bonus
+    INTO #BonusPersonTempTable
+    FROM bonusdetails
+    WHERE EmployeeName IS NOT NULL
+          AND FDATE Between @P_StartDate AND @P_EndDate
+          AND WareHouseName = @P_WareHouseName
+    GROUP BY DATE,
+	         FDATE,
+             EmployeeName
+
+    SELECT TOP 100000 [Date], FDATE, EmployeeName, Bonus FROM #BonusPersonTempTable Order By FDate DESC
+	
+END

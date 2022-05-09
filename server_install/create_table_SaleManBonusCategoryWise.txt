@@ -1,0 +1,42 @@
+USE [Parish2017]
+GO
+
+/****** Object:  Table [dbo].[SaleManBonusCategoryWise]    Script Date: 5/9/2022 1:11:57 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[SaleManBonusCategoryWise](
+	[WareHouseId] [bigint] NOT NULL,
+	[WareHouseName] [varchar](50) NOT NULL,
+	[EmployeeName] [varchar](200) NOT NULL,
+	[AccountCode] [varchar](16) NOT NULL,
+	[ItemCategoryID] [bigint] NOT NULL,
+	[ItemCategory] [varchar](50) NOT NULL,
+	[SubCategory1] [varchar](50) NOT NULL,
+	[SubCategory2] [varchar](50) NOT NULL,
+	[SubCategory3] [varchar](50) NOT NULL,
+	[SubCategory4] [varchar](50) NOT NULL,
+	[SubCategory] [varchar](255) NOT NULL,
+	[Bonus] [money] NOT NULL,
+ CONSTRAINT [PK_SaleManBonusCategoryWise] PRIMARY KEY CLUSTERED 
+(
+	[WareHouseId] ASC,
+	[WareHouseName] ASC,
+	[EmployeeName] ASC,
+	[AccountCode] ASC,
+	[ItemCategoryID] ASC,
+	[ItemCategory] ASC,
+	[SubCategory1] ASC,
+	[SubCategory2] ASC,
+	[SubCategory3] ASC,
+	[SubCategory4] ASC,
+	[SubCategory] ASC,
+	[Bonus] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+

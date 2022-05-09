@@ -1,0 +1,25 @@
+USE [Parish2017]
+GO
+
+/****** Object:  Table [dbo].[SaleTargetDailyAmount]    Script Date: 5/9/2022 1:09:10 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[SaleTargetDailyAmount](
+	[WareHouseName] [varchar](50) NOT NULL,
+	[Date] [smalldatetime] NOT NULL,
+	[EmployeeName] [varchar](200) NOT NULL,
+	[Amount] [money] NOT NULL,
+ CONSTRAINT [PK_SaleTargetDailyAmount] PRIMARY KEY CLUSTERED 
+(
+	[WareHouseName] ASC,
+	[Date] ASC,
+	[EmployeeName] ASC,
+	[Amount] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+

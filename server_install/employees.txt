@@ -1,0 +1,3 @@
+select t1.AccountCode, t1.AccountName As EmployeeName , t2.WareHouseId, t3.WareHouseName
+from accounts t1 left join accountbalances t2 on t1.accountcode = t2.accountcode LEFT JOIN WareHouse t3 On t2.WareHouseId = t3.WareHouseId
+where t1.Category = 'SM' and t2.WareHouseId in (3,4)

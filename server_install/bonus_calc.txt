@@ -1,0 +1,27 @@
+SELECT  WareHouseId,WareHouseName,EmployeeName,AccountCode,ItemCategoryID,ItemCategory,SubCategory1,SubCategory2,SubCategory3,SubCategory4,SubCategory,Bonus
+FROM SaleManBonusCategoryWise
+WHERE SubCategory != '' AND Bonus > 1
+
+UNION
+
+SELECT  t1.WareHouseId,t1.WareHouseName,t1.EmployeeName,t1.AccountCode,t1.ItemCategoryID,t1.ItemCategory,t1.SubCategory1,t1.SubCategory2,t1.SubCategory3,t1.SubCategory4,t1.SubCategory,t2.Bonus
+FROM 
+
+(SELECT  WareHouseId,WareHouseName,EmployeeName,AccountCode,ItemCategoryID,ItemCategory,SubCategory1,SubCategory2,SubCategory3,SubCategory4,SubCategory
+FROM SaleManBonusCategoryWise
+WHERE SubCategory != '' AND Bonus < 1)t1 
+
+LEFT JOIN 
+
+(SELECT  WareHouseId,WareHouseName,EmployeeName,AccountCode,ItemCategory,Bonus
+FROM SaleManBonusCategoryWise
+WHERE SubCategory = '')t2 
+
+ON t2.WareHouseId=t1.WareHouseId and t2.WareHouseName=t1.WareHouseName and t2.EmployeeName=t1.EmployeeName
+and t2.AccountCode=t1.AccountCode and t2.ItemCategory= t1.ItemCategory
+
+UNION
+
+SELECT  WareHouseId,WareHouseName,EmployeeName,AccountCode,ItemCategoryID,ItemCategory,SubCategory1,SubCategory2,SubCategory3,SubCategory4,SubCategory,Bonus
+FROM SaleManBonusCategoryWise
+WHERE SubCategory = '';
