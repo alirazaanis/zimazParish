@@ -132,7 +132,7 @@ namespace zimazParish
             this.bpp_pnlGrid.Name = "bpp_pnlGrid";
             this.bpp_pnlGrid.Size = new System.Drawing.Size(1132, 307);
             this.bpp_pnlGrid.TabIndex = 131;
-            this.bpp_pnlGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.bpp_pnlGridPaint);
+            this.bpp_pnlGrid.Paint += new System.Windows.Forms.PaintEventHandler(this.Bpp_pnlGridPaint);
             // 
             // bpp_cmbWarehouse
             // 
@@ -142,7 +142,7 @@ namespace zimazParish
             this.bpp_cmbWarehouse.Name = "bpp_cmbWarehouse";
             this.bpp_cmbWarehouse.Size = new System.Drawing.Size(121, 24);
             this.bpp_cmbWarehouse.TabIndex = 132;
-            this.bpp_cmbWarehouse.SelectedIndexChanged += new System.EventHandler(this.bpp_cmbSelectedIndexChanged);
+            this.bpp_cmbWarehouse.SelectedIndexChanged += new System.EventHandler(this.Bpp_cmbSelectedIndexChanged);
             // 
             // bpp_cmbEmployee
             // 
@@ -152,7 +152,7 @@ namespace zimazParish
             this.bpp_cmbEmployee.Name = "bpp_cmbEmployee";
             this.bpp_cmbEmployee.Size = new System.Drawing.Size(121, 24);
             this.bpp_cmbEmployee.TabIndex = 133;
-            this.bpp_cmbEmployee.SelectedIndexChanged += new System.EventHandler(this.bpp_cmbSelectedIndexChanged);
+            this.bpp_cmbEmployee.SelectedIndexChanged += new System.EventHandler(this.Bpp_cmbSelectedIndexChanged);
             // 
             // groupBox1
             // 
@@ -384,7 +384,7 @@ namespace zimazParish
             this.button2.TabIndex = 148;
             this.button2.Text = "Set Default Dates";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button2.Click += new System.EventHandler(this.Button2_Click);
             // 
             // label6
             // 
@@ -639,7 +639,7 @@ namespace zimazParish
             this.button1.TabIndex = 148;
             this.button1.Text = "Set Default Dates";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.Button1_Click);
             // 
             // label10
             // 

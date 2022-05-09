@@ -13,7 +13,7 @@ namespace zimazParish
         private static string m_serverName = String.Empty;
         private static string m_initialCatalog = String.Empty;
         private static bool m_useIntegratedSecurity = false;
-        public static void SetConnectionString(string connstr)
+        public static void ParseConnectionString(string connstr)
         {
             Dictionary<string, string> connStringKeys = new Dictionary<string, string>();
             string[] keysBySemicolon = connstr.Split(';');

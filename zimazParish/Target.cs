@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Reflection;
 using System.Data.SqlClient;
-using System.Configuration;
-using CrystalDecisions.CrystalReports.Engine;
-using CrystalDecisions.Shared;
 
 
 namespace zimazParish
@@ -25,7 +18,7 @@ namespace zimazParish
         float initHeight;
 
         string bpp_FilterMain = "";
-        string bpp_FilterDetails = "ItemCategory";
+        readonly string bpp_FilterDetails = "ItemCategory";
 
         string tgt_FilterSTDA = "";
         string tgt_FilterSTD = "";
@@ -34,80 +27,74 @@ namespace zimazParish
         string etgt_FilterSTD = "";
 
         string stgt_FilterEdit = "";
-
-        string connectionString = "Data Source=59.103.166.127;Initial Catalog=Parish2018;" +
+        readonly string connectionString = "Data Source=59.103.166.127;Initial Catalog=Parish2017;" +
             "Persist Security Info=True;User ID=parish;Password=parish";
 
         bool cmb_Initialized = false;
-
-        int bpp_expandBtnIndex = 0;
+        readonly int bpp_expandBtnIndex = 0;
         int bpp_expandedRow = 0;
-        string bpp_expandBtnImageName = "expand.png";
-        string bpp_collapseBtnImageName = "collapse.png";
+        readonly string bpp_expandBtnImageName = "expand.png";
+        readonly string bpp_collapseBtnImageName = "collapse.png";
         string bpp_expandBtnImage = "expand.png";
-        string bpp_expandBtnName = "+";
-        string bpp_expandBtnImageLoc = "C:/myapps/zimazParish/zimazParish/Images/";
+        readonly string bpp_expandBtnName = "+";
+        readonly string bpp_expandBtnImageLoc = "C:/myapps/zimazParish/zimazParish/Images/";
 
         DataTable bpp_DetailDT = new DataTable();
-        DataGridView bpp_MainDGV = new DataGridView();
-        DataGridView bpp_DetailDGV = new DataGridView();
-
-
-        DataGridView tgt_STDDGV = new DataGridView();
-        DataGridView tgt_STDADGV = new DataGridView();
-
-        DataGridView etgt_PRV = new DataGridView();
-        DataGridView etgt_STDDGV = new DataGridView();
-        DataGridView etgt_STDADGV = new DataGridView();
-
-        DataGridView stgt_EditDGV = new DataGridView();
+        private readonly DataGridView bpp_MainDGV = new DataGridView();
+        private readonly DataGridView bpp_DetailDGV = new DataGridView();
+        private readonly DataGridView tgt_STDDGV = new DataGridView();
+        private readonly DataGridView tgt_STDADGV = new DataGridView();
+        private readonly DataGridView etgt_PRV = new DataGridView();
+        private readonly DataGridView etgt_STDDGV = new DataGridView();
+        private readonly DataGridView etgt_STDADGV = new DataGridView();
+        private readonly DataGridView stgt_EditDGV = new DataGridView();
         #endregion
 
         public Target()
         {
             InitializeComponent();
             // bpp
-            bpp_MainDGV.CellValueChanged += bpp_DGVCellValueChanged;
-            bpp_DetailDGV.CellValueChanged += bpp_DGVCellValueChanged;
+            bpp_MainDGV.CellValueChanged += Bpp_DGVCellValueChanged;
+            bpp_DetailDGV.CellValueChanged += Bpp_DGVCellValueChanged;
 
-            etgt_STDDGV.CellValueChanged += etgt_DGVCellValueChanged;
-            etgt_STDADGV.CellValueChanged += etgt_DGVCellValueChanged;
+            etgt_STDDGV.CellValueChanged += Etgt_DGVCellValueChanged;
+            etgt_STDADGV.CellValueChanged += Etgt_DGVCellValueChanged;
 
-            stgt_EditDGV.CellValueChanged += stgt_DGVCellValueChanged;
+            stgt_EditDGV.CellValueChanged += Stgt_DGVCellValueChanged;
 
-            bpp_MainDGV.CellValidating += bpp_DGVCellValidating;
-            bpp_DetailDGV.CellValidating += bpp_DGVCellValidating;
+            bpp_MainDGV.CellValidating += Bpp_DGVCellValidating;
+            bpp_DetailDGV.CellValidating += Bpp_DGVCellValidating;
 
-            etgt_STDDGV.CellValidating += bpp_DGVCellValidating;
-            etgt_STDADGV.CellValidating += bpp_DGVCellValidating;
+            etgt_STDDGV.CellValidating += Bpp_DGVCellValidating;
+            etgt_STDADGV.CellValidating += Bpp_DGVCellValidating;
 
-            stgt_EditDGV.CellValidating += bpp_DGVCellValidating;
+            stgt_EditDGV.CellValidating += Bpp_DGVCellValidating;
 
             bpp_MainDGV.CellContentClick += new
-                DataGridViewCellEventHandler(bpp_MainDGV_CellContentClick);
-            bpp_cmbRptWarehouse.SelectedIndexChanged += bpp_cmbRpt;
-            bpp_cmbRptStartDate.SelectedIndexChanged += bpp_cmbRpt;
-            bpp_cmbRptEndDate.SelectedIndexChanged += bpp_cmbRpt;
+                DataGridViewCellEventHandler(Bpp_MainDGV_CellContentClick);
+            bpp_cmbRptWarehouse.SelectedIndexChanged += Bpp_cmbRpt;
+            bpp_cmbRptStartDate.SelectedIndexChanged += Bpp_cmbRpt;
+            bpp_cmbRptEndDate.SelectedIndexChanged += Bpp_cmbRpt;
 
             //tgt
-            tgt_cmbWarehouse.SelectedIndexChanged += tgt_cmbChanged;
-            tgt_cmbPRVStartDate.SelectedIndexChanged += tgt_cmbChanged;
-            tgt_cmbPRVEndDate.SelectedIndexChanged += tgt_cmbChanged;
-            tgt_cmbSTDStartDate.SelectedIndexChanged += tgt_cmbChanged;
-            tgt_cmbSTDEndDate.SelectedIndexChanged += tgt_cmbChanged;
-            tgt_cmbSTDADate.SelectedIndexChanged += tgt_cmbChanged;
+            tgt_cmbWarehouse.SelectedIndexChanged += Tgt_cmbChanged;
+            tgt_cmbPRVStartDate.SelectedIndexChanged += Tgt_cmbChanged;
+            tgt_cmbPRVEndDate.SelectedIndexChanged += Tgt_cmbChanged;
+            tgt_cmbSTDStartDate.SelectedIndexChanged += Tgt_cmbChanged;
+            tgt_cmbSTDEndDate.SelectedIndexChanged += Tgt_cmbChanged;
+            tgt_cmbSTDADate.SelectedIndexChanged += Tgt_cmbChanged;
 
             //etgt
-            etgt_cmbWarehouse.SelectedIndexChanged += etgt_cmbChanged;
-            etgt_cmbPRVStartDate.SelectedIndexChanged += etgt_cmbChanged;
-            etgt_cmbPRVEndDate.SelectedIndexChanged += etgt_cmbChanged;
-            etgt_cmbSTDStartDate.SelectedIndexChanged += etgt_cmbChanged;
-            etgt_cmbSTDEndDate.SelectedIndexChanged += etgt_cmbChanged;
-            etgt_cmbSTDADate.SelectedIndexChanged += etgt_cmbChanged;
+            etgt_cmbWarehouse.SelectedIndexChanged += Etgt_cmbChanged;
+            etgt_cmbPRVStartDate.SelectedIndexChanged += Etgt_cmbChanged;
+            etgt_cmbPRVEndDate.SelectedIndexChanged += Etgt_cmbChanged;
+            etgt_cmbSTDStartDate.SelectedIndexChanged += Etgt_cmbChanged;
+            etgt_cmbSTDEndDate.SelectedIndexChanged += Etgt_cmbChanged;
+            etgt_cmbSTDADate.SelectedIndexChanged += Etgt_cmbChanged;
 
-            stgt_cmbWarehouse.SelectedIndexChanged += stgt_cmbChanged;
-            stgt_cmbStartDate.SelectedIndexChanged += stgt_cmbChanged;
-            stgt_cmbEndDate.SelectedIndexChanged += stgt_cmbChanged;
+            stgt_cmbWarehouse.SelectedIndexChanged += Stgt_cmbChanged;
+            stgt_cmbStartDate.SelectedIndexChanged += Stgt_cmbChanged;
+            stgt_cmbEndDate.SelectedIndexChanged += Stgt_cmbChanged;
 
         }
 
@@ -209,7 +196,7 @@ namespace zimazParish
         #endregion
 
         #region VariousFunctions
-        void bpp_SetFilter()
+        void Bpp_SetFilter()
         {
             if (bpp_cmbWarehouse.Items.Count > 0 && bpp_cmbEmployee.Items.Count > 0 &&
                 bpp_cmbWarehouse.SelectedIndex > -1 && bpp_cmbEmployee.SelectedIndex > -1)
@@ -222,7 +209,7 @@ namespace zimazParish
             }
         }
 
-        void tgt_SetFilterSTD()
+        void Tgt_SetFilterSTD()
         {
             if (tgt_cmbWarehouse.Items.Count > 0 &&
                 tgt_cmbWarehouse.SelectedIndex > -1 &&
@@ -243,7 +230,7 @@ namespace zimazParish
             }
         }
 
-        void etgt_SetFilterSTD()
+        private void Etgt_SetFilterSTD()
         {
             if (etgt_cmbWarehouse.Items.Count > 0 &&
                 etgt_cmbWarehouse.SelectedIndex > -1 &&
@@ -264,7 +251,7 @@ namespace zimazParish
             }
         }
 
-        void stgt_SetFilter()
+        void Stgt_SetFilter()
         {
             if (stgt_cmbWarehouse.Items.Count > 0 &&
                 stgt_cmbWarehouse.SelectedIndex > -1)
@@ -290,18 +277,20 @@ namespace zimazParish
             dgv.Location = new Point(0, 0);
         }
 
-        void bpp_MainDGV_Initialize()
+        void Bpp_MainDGV_Initialize()
         {
             SetDGV(bpp_MainDGV, "bpp_MainDGV");
             bpp_MainDGV.Size = new Size((int)initWidth - 25, 240);
             bpp_pnlGrid.Controls.Add(bpp_MainDGV);
-            DataGridViewImageColumn expandBtn = new DataGridViewImageColumn();
-            expandBtn.Name = bpp_expandBtnName;
-            expandBtn.Image = Image.FromFile(bpp_expandBtnImageLoc + bpp_expandBtnImageName);
-            expandBtn.Visible = Visible;
-            expandBtn.Width = 26;
-            expandBtn.SortMode = DataGridViewColumnSortMode.Automatic;
-            expandBtn.Resizable = DataGridViewTriState.True;
+            DataGridViewImageColumn expandBtn = new DataGridViewImageColumn
+            {
+                Name = bpp_expandBtnName,
+                Image = Image.FromFile(bpp_expandBtnImageLoc + bpp_expandBtnImageName),
+                Visible = Visible,
+                Width = 26,
+                SortMode = DataGridViewColumnSortMode.Automatic,
+                Resizable = DataGridViewTriState.True
+            };
             expandBtn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             expandBtn.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
             bpp_MainDGV.Columns.Add(expandBtn);
@@ -324,7 +313,7 @@ namespace zimazParish
             }
         }
 
-        void tgt_STDDGV_Initialize()
+        void Tgt_STDDGV_Initialize()
         {
             SetDGV(tgt_STDDGV, "tgt_STDDGV");
             tgt_STDDGV.Dock = DockStyle.Fill;
@@ -376,7 +365,7 @@ namespace zimazParish
             }
         }
 
-        void tgt_STDADGV_Initialize()
+        void Tgt_STDADGV_Initialize()
         {
             SetDGV(tgt_STDADGV, "tgt_STDADGV");
             tgt_STDADGV.Dock = DockStyle.Fill;
@@ -435,7 +424,7 @@ namespace zimazParish
             }
         }
 
-        void etgt_PRV_Initialize()
+        void Etgt_PRV_Initialize()
         {
             SetDGV(etgt_PRV, "etgt_PRV");
             etgt_PRV.Dock = DockStyle.Fill;
@@ -473,7 +462,7 @@ namespace zimazParish
             }
         }
 
-        void etgt_STDDGV_Initialize()
+        void Etgt_STDDGV_Initialize()
         {
             SetDGV(etgt_STDDGV, "etgt_STDDGV");
             etgt_STDDGV.Dock = DockStyle.Fill;
@@ -496,7 +485,7 @@ namespace zimazParish
             }
         }
 
-        void etgt_STDADGV_Initialize()
+        void Etgt_STDADGV_Initialize()
         {
             SetDGV(etgt_STDADGV, "etgt_STDADGV");
             etgt_STDADGV.Dock = DockStyle.Fill;
@@ -517,7 +506,7 @@ namespace zimazParish
             }
         }
 
-        void stgt_EditDGV_Initialize()
+        void Stgt_EditDGV_Initialize()
         {
             SetDGV(stgt_EditDGV, "stgt_EditDGV");
             stgt_EditDGV.Dock = DockStyle.Fill;
@@ -540,7 +529,7 @@ namespace zimazParish
             }
         }
 
-        void bpp_DetailDGV_Initialize()
+        void Bpp_DetailDGV_Initialize()
         {
             SetDGV(bpp_DetailDGV, "bpp_DetailDGV");
             bpp_pnlGrid.Controls.Add(bpp_DetailDGV);
@@ -550,7 +539,7 @@ namespace zimazParish
             bpp_DetailDT = GetDataSet(sql).Tables["T"];
         }
 
-        void bpp_rptLoad()
+        void Bpp_rptLoad()
         {
             if (bpp_cmbRptWarehouse.Items.Count > 0 &&
                 bpp_cmbRptStartDate.Items.Count > 0 &&
@@ -573,7 +562,7 @@ namespace zimazParish
             }
         }
 
-        void tgt_rptLoad()
+        void Tgt_rptLoad()
         {
             if (bpp_cmbRptWarehouse.Items.Count > 0 &&
                 bpp_cmbRptStartDate.Items.Count > 0 &&
@@ -596,7 +585,7 @@ namespace zimazParish
             }
         }
 
-        void stgt_rptLoad()
+        void Stgt_rptLoad()
         {
             if (stgt_cmbWarehouse.Items.Count > 0 &&
                 stgt_cmbStartDate.Items.Count > 0 &&
@@ -625,7 +614,7 @@ namespace zimazParish
         {
             float size1 = this.Size.Width / initWidth;
             float size2 = this.Size.Height / initHeight;
-            SizeF scale = new SizeF(size1, size2);
+            _ = new SizeF(size1, size2);
             initWidth = this.Size.Width;
             initHeight = this.Size.Height;
             bpp_MainDGV.Size = new Size((int)initWidth - 25, 240);
@@ -633,11 +622,11 @@ namespace zimazParish
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            DbConnectionInfo.SetConnectionString(connectionString);
+            DbConnectionInfo.ParseConnectionString(connectionString);
             initWidth = this.Size.Width;
             initHeight = this.Size.Height;
-            string prvStartDate, prvEndDate, stdStartDate, stdEndDate, stdaDate;
-            getDates(out prvStartDate, out prvEndDate, out stdStartDate, out stdEndDate, out stdaDate);
+
+            GetDates(out string prvStartDate, out string prvEndDate, out string stdStartDate, out string stdEndDate, out string stdaDate);
 
             GetColumnInList(
                 "SELECT DISTINCT WareHouseName FROM SaleManBonusCategoryWise"
@@ -665,10 +654,10 @@ namespace zimazParish
             if (bpp_cmbRptStartDate.Items.Count > 0) { bpp_cmbRptStartDate.SelectedIndex = 6; }
             if (bpp_cmbRptEndDate.Items.Count > 0) { bpp_cmbRptEndDate.SelectedIndex = 0; }
 
-            bpp_SetFilter();
-            bpp_MainDGV_Initialize();
-            bpp_DetailDGV_Initialize();
-            bpp_rptLoad();
+            Bpp_SetFilter();
+            Bpp_MainDGV_Initialize();
+            Bpp_DetailDGV_Initialize();
+            Bpp_rptLoad();
 
             GetColumnInList(
                 "SELECT DISTINCT WareHouseName FROM WareHouse WHERE WareHouseName In ('Parish','Zimaz')"
@@ -704,10 +693,10 @@ namespace zimazParish
             if (tgt_cmbSTDEndDate.Items.Count > 0) { tgt_cmbSTDEndDate.SelectedItem = stdEndDate; }
             if (tgt_cmbSTDADate.Items.Count > 0) { tgt_cmbSTDADate.SelectedItem = stdaDate; }
 
-            tgt_SetFilterSTD();
-            tgt_STDDGV_Initialize();
-            tgt_STDADGV_Initialize();
-            tgt_rptLoad();
+            Tgt_SetFilterSTD();
+            Tgt_STDDGV_Initialize();
+            Tgt_STDADGV_Initialize();
+            Tgt_rptLoad();
 
             GetColumnInList(
                 "SELECT DISTINCT WareHouseName FROM WareHouse WHERE WareHouseName In ('Parish','Zimaz')"
@@ -743,10 +732,10 @@ namespace zimazParish
             if (etgt_cmbSTDEndDate.Items.Count > 0) { etgt_cmbSTDEndDate.SelectedItem = stdEndDate; }
             if (etgt_cmbSTDADate.Items.Count > 0) { etgt_cmbSTDADate.SelectedItem = stdaDate; }
 
-            etgt_SetFilterSTD();
-            etgt_STDDGV_Initialize();
-            etgt_STDADGV_Initialize();
-            etgt_PRV_Initialize();
+            Etgt_SetFilterSTD();
+            Etgt_STDDGV_Initialize();
+            Etgt_STDADGV_Initialize();
+            Etgt_PRV_Initialize();
 
 
             GetColumnInList(
@@ -765,12 +754,12 @@ namespace zimazParish
             if (stgt_cmbStartDate.Items.Count > 0) { stgt_cmbStartDate.SelectedIndex = 6; }
             if (stgt_cmbEndDate.Items.Count > 0) { stgt_cmbEndDate.SelectedIndex = 0; }
 
-            stgt_SetFilter();
-            stgt_EditDGV_Initialize();
-            stgt_rptLoad();
+            Stgt_SetFilter();
+            Stgt_EditDGV_Initialize();
+            Stgt_rptLoad();
             cmb_Initialized = true;
         }
-        private void bpp_DGVCellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        private void Bpp_DGVCellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
             DataGridView dgv = (DataGridView)sender;
             string headerText = dgv.Columns[e.ColumnIndex].HeaderText;
@@ -784,9 +773,8 @@ namespace zimazParish
                 !headerText.Equals("ACCESSORIES") ||
                 !headerText.Equals("Goal") ||
                 !headerText.Equals("Amount")) return;
-            decimal output;
             if (!decimal.TryParse(e.FormattedValue.ToString() == "" ? "0" :
-                e.FormattedValue.ToString(), out output))
+                e.FormattedValue.ToString(), out decimal output))
             {
                 MessageBox.Show("Must be numeric");
                 e.Cancel = true;
@@ -797,7 +785,7 @@ namespace zimazParish
                 e.Cancel = true;
             }
         }
-        private void bpp_DGVCellValueChanged(object sender, DataGridViewCellEventArgs e)
+        private void Bpp_DGVCellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             DataGridView dgv = (DataGridView)sender;
             ExecuteQuery("Update SaleManBonusCategoryWise Set Bonus = " +
@@ -806,7 +794,7 @@ namespace zimazParish
                 dgv.Rows[e.RowIndex].Cells[dgv.Name == "bpp_MainDGV" ? 1 : 0].Value.ToString() +
                 " AND " + bpp_FilterMain);
         }
-        private void etgt_DGVCellValueChanged(object sender, DataGridViewCellEventArgs e)
+        private void Etgt_DGVCellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             DataGridView dgv = (DataGridView)sender;
             if (dgv.Name == "etgt_STDADGV")
@@ -830,7 +818,7 @@ namespace zimazParish
             }
         }
 
-        private void stgt_DGVCellValueChanged(object sender, DataGridViewCellEventArgs e)
+        private void Stgt_DGVCellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             DataGridView dgv = (DataGridView)sender;
             ExecuteQuery("Update SalemanTarget Set " +
@@ -854,7 +842,7 @@ namespace zimazParish
               stgt_cmbWarehouse.SelectedItem.ToString() + "'");
         }
 
-        private void bpp_MainDGV_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Bpp_MainDGV_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == bpp_expandBtnIndex)
             {
@@ -872,14 +860,16 @@ namespace zimazParish
                         bpp_MainDGV.Rows[e.RowIndex].Cells[e.ColumnIndex].Value =
                             Image.FromFile(bpp_expandBtnImageLoc + bpp_expandBtnImage);
                         bpp_DetailDGV.Visible = true;
-                        String FilterExpression =
+                        string FilterExpression =
                             bpp_MainDGV.Rows[e.RowIndex].Cells[bpp_FilterDetails].Value.ToString();
                         bpp_MainDGV.Controls.Add(bpp_DetailDGV);
                         Rectangle dgvRectangle = bpp_MainDGV.GetCellDisplayRectangle(1, e.RowIndex, true);
                         bpp_DetailDGV.Size = new Size(bpp_MainDGV.Width - 200, 180 - dgvRectangle.Y + 20);
                         bpp_DetailDGV.Location = new Point(dgvRectangle.X, dgvRectangle.Y + 20);
-                        DataView detailView = new DataView(bpp_DetailDT);
-                        detailView.RowFilter = bpp_FilterDetails + " = '" + FilterExpression + "'";
+                        DataView detailView = new DataView(bpp_DetailDT)
+                        {
+                            RowFilter = bpp_FilterDetails + " = '" + FilterExpression + "'"
+                        };
                         if (detailView.Count > 0)
                         {
                             bpp_DetailDGV.DataSource = detailView;
@@ -908,11 +898,11 @@ namespace zimazParish
                 bpp_DetailDGV.Visible = false;
             }
         }
-        private void bpp_pnlGridPaint(object sender, PaintEventArgs e)
+        private void Bpp_pnlGridPaint(object sender, PaintEventArgs e)
         {
 
         }
-        private void bpp_cmbSelectedIndexChanged(object sender, EventArgs e)
+        private void Bpp_cmbSelectedIndexChanged(object sender, EventArgs e)
         {
             if (bpp_cmbWarehouse.Items.Count > 0 &&
                 bpp_cmbEmployee.Items.Count > 0 &&
@@ -920,13 +910,13 @@ namespace zimazParish
                 bpp_cmbEmployee.SelectedIndex > -1 &&
                 cmb_Initialized)
             {
-                bpp_SetFilter();
-                bpp_MainDGV_Initialize();
-                bpp_DetailDGV_Initialize();
+                Bpp_SetFilter();
+                Bpp_MainDGV_Initialize();
+                Bpp_DetailDGV_Initialize();
             }
         }
 
-        private void bpp_cmbRpt(object sender, EventArgs e)
+        private void Bpp_cmbRpt(object sender, EventArgs e)
         {
             if (bpp_cmbRptWarehouse.Items.Count > 0 &&
                 bpp_cmbRptStartDate.Items.Count > 0 &&
@@ -937,11 +927,11 @@ namespace zimazParish
                 cmb_Initialized)
             {
 
-                bpp_rptLoad();
+                Bpp_rptLoad();
             }
         }
 
-        private void tgt_cmbChanged(object sender, EventArgs e)
+        private void Tgt_cmbChanged(object sender, EventArgs e)
         {
             if (tgt_cmbWarehouse.Items.Count > 0 &&
                 tgt_cmbWarehouse.SelectedIndex > -1 &&
@@ -957,14 +947,14 @@ namespace zimazParish
                 tgt_cmbSTDADate.SelectedIndex > -1 &&
                 cmb_Initialized)
             {
-                tgt_SetFilterSTD();
-                tgt_STDDGV_Initialize();
-                tgt_STDADGV_Initialize();
-                tgt_rptLoad();
+                Tgt_SetFilterSTD();
+                Tgt_STDDGV_Initialize();
+                Tgt_STDADGV_Initialize();
+                Tgt_rptLoad();
             }
         }
 
-        private void etgt_cmbChanged(object sender, EventArgs e)
+        private void Etgt_cmbChanged(object sender, EventArgs e)
         {
 
             if (etgt_cmbWarehouse.Items.Count > 0 &&
@@ -981,14 +971,14 @@ namespace zimazParish
                 etgt_cmbSTDADate.SelectedIndex > -1 &&
                 cmb_Initialized)
             {
-                etgt_SetFilterSTD();
-                etgt_STDDGV_Initialize();
-                etgt_STDADGV_Initialize();
-                etgt_PRV_Initialize();
+                Etgt_SetFilterSTD();
+                Etgt_STDDGV_Initialize();
+                Etgt_STDADGV_Initialize();
+                Etgt_PRV_Initialize();
             }
         }
 
-        private void stgt_cmbChanged(object sender, EventArgs e)
+        private void Stgt_cmbChanged(object sender, EventArgs e)
         {
             if (stgt_cmbWarehouse.Items.Count > 0 &&
                 stgt_cmbWarehouse.SelectedIndex > -1 &&
@@ -998,17 +988,16 @@ namespace zimazParish
                 stgt_cmbEndDate.SelectedIndex > -1 &&
                 cmb_Initialized)
             {
-                stgt_SetFilter();
-                stgt_EditDGV_Initialize();
-                stgt_rptLoad();
+                Stgt_SetFilter();
+                Stgt_EditDGV_Initialize();
+                Stgt_rptLoad();
             }
         }
 
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Button2_Click(object sender, EventArgs e)
         {
-            string prvStartDate, prvEndDate, stdStartDate, stdEndDate, stdaDate;
-            getDates(out prvStartDate, out prvEndDate, out stdStartDate, out stdEndDate, out stdaDate);
+            GetDates(out string prvStartDate, out string prvEndDate, out string stdStartDate, out string stdEndDate, out string stdaDate);
 
             if (tgt_cmbWarehouse.Items.Count > 0) { tgt_cmbWarehouse.SelectedIndex = 0; }
             if (tgt_cmbPRVStartDate.Items.Count > 0) { tgt_cmbPRVStartDate.SelectedItem = prvStartDate; }
@@ -1017,15 +1006,14 @@ namespace zimazParish
             if (tgt_cmbSTDEndDate.Items.Count > 0) { tgt_cmbSTDEndDate.SelectedItem = stdEndDate; }
             if (tgt_cmbSTDADate.Items.Count > 0) { tgt_cmbSTDADate.SelectedItem = stdaDate; }
 
-            tgt_SetFilterSTD();
-            tgt_STDDGV_Initialize();
-            tgt_STDADGV_Initialize();
-            tgt_rptLoad();
+            Tgt_SetFilterSTD();
+            Tgt_STDDGV_Initialize();
+            Tgt_STDADGV_Initialize();
+            Tgt_rptLoad();
         }
-        private void button1_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
-            string prvStartDate, prvEndDate, stdStartDate, stdEndDate, stdaDate;
-            getDates(out prvStartDate, out prvEndDate, out stdStartDate, out stdEndDate, out stdaDate);
+            GetDates(out string prvStartDate, out string prvEndDate, out string stdStartDate, out string stdEndDate, out string stdaDate);
 
             if (etgt_cmbWarehouse.Items.Count > 0) { etgt_cmbWarehouse.SelectedIndex = 0; }
             if (etgt_cmbPRVStartDate.Items.Count > 0) { etgt_cmbPRVStartDate.SelectedItem = prvStartDate; }
@@ -1034,14 +1022,14 @@ namespace zimazParish
             if (etgt_cmbSTDEndDate.Items.Count > 0) { etgt_cmbSTDEndDate.SelectedItem = stdEndDate; }
             if (etgt_cmbSTDADate.Items.Count > 0) { etgt_cmbSTDADate.SelectedItem = stdaDate; }
 
-            etgt_SetFilterSTD();
-            etgt_STDDGV_Initialize();
-            etgt_STDADGV_Initialize();
-            etgt_PRV_Initialize();
+            Etgt_SetFilterSTD();
+            Etgt_STDDGV_Initialize();
+            Etgt_STDADGV_Initialize();
+            Etgt_PRV_Initialize();
         }
 
 
-        void getDates(out string prvStartDate, out string prvEndDate, out string stdStartDate, out string stdEndDate, out string stdaDate)
+        void GetDates(out string prvStartDate, out string prvEndDate, out string stdStartDate, out string stdEndDate, out string stdaDate)
         {
             int CurrentMonthYear = DateTime.Now.Year;
             int CurrentMonth = DateTime.Now.Month;
